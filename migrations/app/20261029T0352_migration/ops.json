@@ -1,0 +1,733 @@
+[
+  {
+    "id": "dropColumn.User.updatedAt",
+    "label": "Drop column \"updatedAt\" from \"User\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "updatedAt",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"updatedAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"updatedAt\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop column \"updatedAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" DROP COLUMN \"updatedAt\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"updatedAt\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "updatedAt"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"updatedAt\" on \"User\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.Movie",
+    "label": "Create table \"Movie\"",
+    "summary": "Creates table \"Movie\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "Movie"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"Movie\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Movie\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"Movie\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"Movie\"",
+        "sql": "CREATE TABLE \"public\".\"Movie\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"createdBy\" text NOT NULL,\n  \"genres\" text[] DEFAULT '{}' NOT NULL,\n  \"id\" text NOT NULL,\n  \"overview\" text,\n  \"posterUrl\" text,\n  \"releaseYear\" int4 NOT NULL,\n  \"runtime\" int4,\n  \"title\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"Movie_genres_elem_not_null_6dc02271\" CHECK (array_position(\"genres\", NULL) IS NULL)\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"Movie\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"Movie\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"Movie\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "table.WatchlistItem",
+    "label": "Create table \"WatchlistItem\"",
+    "summary": "Creates table \"WatchlistItem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "WatchlistItem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"WatchlistItem\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistItem\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "table \"WatchlistItem\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"WatchlistItem\"",
+        "sql": "CREATE TABLE \"public\".\"WatchlistItem\" (\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"movieId\" text NOT NULL,\n  \"notes\" text,\n  \"rating\" int4,\n  \"status\" text DEFAULT 'PLANNED' NOT NULL,\n  \"updatedAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"userId\" text NOT NULL,\n  PRIMARY KEY (\"id\"),\n  CONSTRAINT \"WatchlistItem_status_check_96b071fd\" CHECK (\"status\" IN ('PLANNED', 'WATCHING', 'COMPLETED', 'DROPPED'))\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"WatchlistItem\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3))) AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistItem\"",
+          "r",
+          "p"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "table \"WatchlistItem\""
+        }
+      }
+    ]
+  },
+  {
+    "id": "setDefault.User.createdAt",
+    "label": "Set default on \"User\".\"createdAt\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "createdAt",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"createdAt\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "createdAt"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"createdAt\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "set default on \"createdAt\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"createdAt\" SET DEFAULT (now())"
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "alterType.User.id",
+    "label": "Alter type of \"User\".\"id\" to text",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "id",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"id\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"id\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"id\" to text",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"id\" TYPE text USING \"id\"::text",
+        "meta": {
+          "convertedColumn": {
+            "table": "User",
+            "column": "id",
+            "by": "cast"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"id\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "id",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterNullability.setNotNull.User.name",
+    "label": "Set NOT NULL on \"User\".\"name\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "name",
+        "table": "User"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"name\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "name"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"name\" on \"User\""
+        }
+      },
+      {
+        "description": "ensure no NULL values in \"name\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"User\" WHERE \"name\" IS NULL) AS \"result\"",
+        "params": [],
+        "meta": {
+          "requiredColumn": {
+            "table": "User",
+            "column": "name",
+            "reason": "nullValues"
+          }
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"name\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"name\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"name\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "name",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.User.password",
+    "label": "Add column password to User",
+    "summary": "Adds column password to table User",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "User"
+      }
+    },
+    "operationClass": "additive",
+    "precheck": [
+      {
+        "description": "ensure column \"password\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "password"
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "column \"password\" on \"User\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"password\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ADD COLUMN \"password\" text DEFAULT ('') NOT NULL"
+      },
+      {
+        "description": "drop temporary default from column \"password\"",
+        "sql": "ALTER TABLE \"public\".\"User\" ALTER COLUMN \"password\" DROP DEFAULT"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"password\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "password"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"password\" on \"User\""
+        }
+      },
+      {
+        "description": "verify column \"password\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "password",
+          "NO"
+        ]
+      },
+      {
+        "description": "verify column \"password\" has no default after temporary default removal",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"column_default\" IS NOT NULL)) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "password"
+        ]
+      },
+      {
+        "description": "verify column \"password\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "User",
+          "password",
+          "text"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.WatchlistItem.WatchlistItem_userId_movieId_key",
+    "label": "Add unique constraint on \"WatchlistItem\" (userId, movieId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "WatchlistItem_userId_movieId_key",
+        "table": "WatchlistItem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"WatchlistItem_userId_movieId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WatchlistItem_userId_movieId_key",
+          "public",
+          "\"public\".\"WatchlistItem\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "constraint \"WatchlistItem_userId_movieId_key\" on \"WatchlistItem\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"WatchlistItem_userId_movieId_key\"",
+        "sql": "ALTER TABLE \"public\".\"WatchlistItem\" ADD CONSTRAINT \"WatchlistItem_userId_movieId_key\" UNIQUE (\"userId\", \"movieId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify unique constraint \"WatchlistItem_userId_movieId_key\" exists on (userId, movieId)",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb)) AS \"result\"",
+        "params": [
+          "WatchlistItem_userId_movieId_key",
+          "public",
+          "\"public\".\"WatchlistItem\"",
+          "u",
+          "[\"userId\",\"movieId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.Movie.Movie_createdBy_idx_ba0f792f",
+    "label": "Create index \"Movie_createdBy_idx_ba0f792f\" on \"Movie\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Movie_createdBy_idx_ba0f792f",
+        "table": "Movie"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Movie_createdBy_idx_ba0f792f\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Movie_createdBy_idx_ba0f792f\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"Movie_createdBy_idx_ba0f792f\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Movie_createdBy_idx_ba0f792f\"",
+        "sql": "CREATE INDEX \"Movie_createdBy_idx_ba0f792f\" ON \"public\".\"Movie\" (\"createdBy\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Movie_createdBy_idx_ba0f792f\" exists on \"Movie\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"Movie_createdBy_idx_ba0f792f\"",
+          "i",
+          "I",
+          "\"public\".\"Movie\"",
+          "btree",
+          "[\"createdBy\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.WatchlistItem.WatchlistItem_movieId_idx_8cb9f9db",
+    "label": "Create index \"WatchlistItem_movieId_idx_8cb9f9db\" on \"WatchlistItem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "WatchlistItem_movieId_idx_8cb9f9db",
+        "table": "WatchlistItem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"WatchlistItem_movieId_idx_8cb9f9db\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistItem_movieId_idx_8cb9f9db\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"WatchlistItem_movieId_idx_8cb9f9db\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"WatchlistItem_movieId_idx_8cb9f9db\"",
+        "sql": "CREATE INDEX \"WatchlistItem_movieId_idx_8cb9f9db\" ON \"public\".\"WatchlistItem\" (\"movieId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"WatchlistItem_movieId_idx_8cb9f9db\" exists on \"WatchlistItem\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistItem_movieId_idx_8cb9f9db\"",
+          "i",
+          "I",
+          "\"public\".\"WatchlistItem\"",
+          "btree",
+          "[\"movieId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.WatchlistItem.WatchlistItem_userId_idx_a489d58a",
+    "label": "Create index \"WatchlistItem_userId_idx_a489d58a\" on \"WatchlistItem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "WatchlistItem_userId_idx_a489d58a",
+        "table": "WatchlistItem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"WatchlistItem_userId_idx_a489d58a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistItem_userId_idx_a489d58a\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "index \"WatchlistItem_userId_idx_a489d58a\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"WatchlistItem_userId_idx_a489d58a\"",
+        "sql": "CREATE INDEX \"WatchlistItem_userId_idx_a489d58a\" ON \"public\".\"WatchlistItem\" (\"userId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"WatchlistItem_userId_idx_a489d58a\" exists on \"WatchlistItem\" with the planned definition",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_index\" AS \"i\" ON \"i\".\"indexrelid\" = \"c\".\"oid\" INNER JOIN \"pg_am\" AS \"m\" ON \"m\".\"oid\" = \"c\".\"relam\" WHERE (\"c\".\"oid\" = to_regclass($1) AND (\"c\".\"relkind\" = $2 OR \"c\".\"relkind\" = $3) AND \"i\".\"indrelid\" = to_regclass($4) AND NOT (\"i\".\"indisunique\") AND \"m\".\"amname\" = $5 AND (\"i\".\"indexprs\" IS NULL AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"i\".\"indkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"i\".\"indrelid\" AND key_attribute.attnum = key_column.attnum) = ($6)::jsonb) AND \"i\".\"indpred\" IS NULL)) AS \"result\"",
+        "params": [
+          "\"public\".\"WatchlistItem_userId_idx_a489d58a\"",
+          "i",
+          "I",
+          "\"public\".\"WatchlistItem\"",
+          "btree",
+          "[\"userId\"]"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Movie.Movie_createdBy_fkey",
+    "label": "Add foreign key \"Movie_createdBy_fkey\" on \"Movie\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Movie_createdBy_fkey",
+        "table": "Movie"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Movie_createdBy_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Movie_createdBy_fkey",
+          "public",
+          "\"public\".\"Movie\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"Movie_createdBy_fkey\" on \"Movie\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Movie_createdBy_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Movie\"\nADD CONSTRAINT \"Movie_createdBy_fkey\"\nFOREIGN KEY (\"createdBy\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Movie_createdBy_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "Movie_createdBy_fkey",
+          "public",
+          "\"public\".\"Movie\"",
+          "f",
+          "[\"createdBy\"]",
+          "\"public\".\"User\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.WatchlistItem.WatchlistItem_userId_fkey",
+    "label": "Add foreign key \"WatchlistItem_userId_fkey\" on \"WatchlistItem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "WatchlistItem_userId_fkey",
+        "table": "WatchlistItem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"WatchlistItem_userId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WatchlistItem_userId_fkey",
+          "public",
+          "\"public\".\"WatchlistItem\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"WatchlistItem_userId_fkey\" on \"WatchlistItem\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"WatchlistItem_userId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"WatchlistItem\"\nADD CONSTRAINT \"WatchlistItem_userId_fkey\"\nFOREIGN KEY (\"userId\")\nREFERENCES \"public\".\"User\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"WatchlistItem_userId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "WatchlistItem_userId_fkey",
+          "public",
+          "\"public\".\"WatchlistItem\"",
+          "f",
+          "[\"userId\"]",
+          "\"public\".\"User\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.WatchlistItem.WatchlistItem_movieId_fkey",
+    "label": "Add foreign key \"WatchlistItem_movieId_fkey\" on \"WatchlistItem\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "WatchlistItem_movieId_fkey",
+        "table": "WatchlistItem"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"WatchlistItem_movieId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "WatchlistItem_movieId_fkey",
+          "public",
+          "\"public\".\"WatchlistItem\""
+        ],
+        "expectation": {
+          "expects": "absent",
+          "object": "FK \"WatchlistItem_movieId_fkey\" on \"WatchlistItem\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"WatchlistItem_movieId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"WatchlistItem\"\nADD CONSTRAINT \"WatchlistItem_movieId_fkey\"\nFOREIGN KEY (\"movieId\")\nREFERENCES \"public\".\"Movie\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"WatchlistItem_movieId_fkey\" exists with the planned columns, referenced table and actions",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3) AND \"c\".\"contype\" = $4 AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"conkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"conrelid\" AND key_attribute.attnum = key_column.attnum) = ($5)::jsonb AND \"c\".\"confrelid\" = to_regclass($6) AND (SELECT coalesce(jsonb_agg(key_attribute.attname ORDER BY key_column.position), '[]'::jsonb) FROM unnest(\"c\".\"confkey\"::int2[]) WITH ORDINALITY AS key_column(attnum, position) JOIN pg_attribute key_attribute ON key_attribute.attrelid = \"c\".\"confrelid\" AND key_attribute.attnum = key_column.attnum) = ($7)::jsonb AND \"c\".\"confdeltype\" = $8 AND \"c\".\"confupdtype\" = $9)) AS \"result\"",
+        "params": [
+          "WatchlistItem_movieId_fkey",
+          "public",
+          "\"public\".\"WatchlistItem\"",
+          "f",
+          "[\"movieId\"]",
+          "\"public\".\"Movie\"",
+          "[\"id\"]",
+          "c",
+          "a"
+        ]
+      }
+    ]
+  }
+]
